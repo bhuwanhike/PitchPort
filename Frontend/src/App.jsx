@@ -18,6 +18,8 @@ import Chatbot from "./components/Chatbot";
 import Footer from "./components/Footer";
 import StartupDetailPage from "./Routes/StartupDetailPage";
 import InvestorDetailPage from "./Routes/InvestorDetailPage";
+import { StartupProvider } from "./contexts/StartupContext";
+import { InvestorProvider } from "./contexts/InvestorContext";
 
 function App() {
   const location = useLocation();
@@ -27,33 +29,40 @@ function App() {
     "/settings/dashboard",
   ];
   return (
-    <AuthProvider>
-      {!hideNavbarOnPaths.includes(location.pathname) && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Explore />} />
-        <Route path="/startups" element={<Startup />} />
-        <Route path="/investors" element={<Investor />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/settings" element={<Settings />}>
-          <Route index element={<Navigate to="settings/profile" replace />} />
-          <Route path="profile" element={<ProfileContent />} />
-          <Route path="dashboard" element={<DashboardContent />} />
-          <Route path="security" element={<SecurityContent />} />
-          <Route path="notifications" element={<NotificationsContent />} />
-          <Route path="billing" element={<BillingContent />} />
-        </Route>
+    <StartupProvider>
+      <InvestorProvider>
+      <AuthProvider>
+        {!hideNavbarOnPaths.includes(location.pathname) && <Navbar />}
+        <Routes>
+          <Route path="/" element={<Explore />} />
+          <Route path="/startups" element={<Startup />} />
+          <Route path="/investors" element={<Investor />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/settings" element={<Settings />}>
+            <Route index element={<Navigate to="settings/profile" replace />} />
+            <Route path="profile" element={<ProfileContent />} />
+            <Route path="dashboard" element={<DashboardContent />} />
+            <Route path="security" element={<SecurityContent />} />
+            <Route path="notifications" element={<NotificationsContent />} />
+            <Route path="billing" element={<BillingContent />} />
+          </Route>
 
-        <Route path="/startup/:startupId" element={<StartupDetailPage />} />
+          <Route path="/startup/:startupId" element={<StartupDetailPage />} />
 
-        <Route path="/investor/:investorId" element={<InvestorDetailPage />} />
-        {/* Optional: A catch-all route for 404 pages */}
-        <Route path="*" element={<div>404 - Page Not Found</div>} />
-      </Routes>
-      <Chatbot />
-      {!hideNavbarOnPaths.includes(location.pathname) && <Footer />}
-    </AuthProvider>
+          <Route
+            path="/investor/:investorId"
+            element={<InvestorDetailPage />}
+          />
+          {/* Optional: A catch-all route for 404 pages */}
+          <Route path="*" element={<div>404 - Page Not Found</div>} />
+        </Routes>
+        <Chatbot />
+        {!hideNavbarOnPaths.includes(location.pathname) && <Footer />}
+      </AuthProvider>
+      </InvestorProvider>
+    </StartupProvider>
   );
 }
 

@@ -31,75 +31,12 @@ import FilterContent from "../components/FilterContent";
 import axios from "axios";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import { GetInvestorContext } from "../contexts/GetInvestor";
 
 const Investor = () => {
   const { isLoggedIn } = useContext(AuthContext);
-  // --- DUMMY DATA ---
-  const allInvestors = useMemo(
-    () => [
-      {
-        id: 1,
-        fullname: "Kunal Shah",
-        location: "Mumbai",
-        industry: ["FinTech", "SaaS", "Consumer"],
-        fundingStage: ["Seed", "Series A"],
-        bio: "Founder of CRED. Passionate about building high-trust ecosystems and backing disruptive ideas in tech.",
-        notableInvestments: ["Razorpay", "Meesho", "Unacademy"],
-        socials: { linkedin: "#", twitter: "#", website: "#" },
-      },
-      {
-        id: 2,
-        fullname: "Anupam Mittal",
-        location: "Mumbai",
-        industry: ["Consumer", "HealthTech", "FinTech"],
-        fundingStage: ["Pre-Seed", "Seed"],
-        bio: "Founder of People Group (Shaadi.com). Early-stage investor focused on scalable consumer internet businesses.",
-        notableInvestments: ["Ola Cabs", "Druva", "Whatfix"],
-        socials: { linkedin: "#", twitter: "#", website: "#" },
-      },
-      {
-        id: 3,
-        fullname: "Rajan Anandan",
-        location: "Bengaluru",
-        industry: ["SaaS", "AI", "HealthTech"],
-        fundingStage: ["Pre-Seed", "Seed", "Series A"],
-        bio: "Managing Director at Sequoia Capital. Formerly at Google. Deep expertise in scaling technology companies in India.",
-        notableInvestments: ["Dunzo", "Practo", "OYO"],
-        socials: { linkedin: "#", twitter: "#", website: "#" },
-      },
-      {
-        id: 4,
-        fullname: "Binny Bansal",
-        location: "Bengaluru",
-        industry: ["E-commerce", "Logistics", "SaaS"],
-        fundingStage: ["Seed", "Series A", "Series B"],
-        bio: "Co-founder of Flipkart. Now investing in and mentoring the next wave of entrepreneurs through 021 Capital.",
-        notableInvestments: ["Acko", "Cure.fit", "Rupeek"],
-        socials: { linkedin: "#", twitter: "#", website: "#" },
-      },
-      {
-        id: 5,
-        fullname: "Vani Kola",
-        location: "Bengaluru",
-        industry: ["FinTech", "HealthTech", "Consumer"],
-        fundingStage: ["Seed", "Series A"],
-        bio: "Managing Director at Kalaari Capital. A visionary investor known for identifying and nurturing category-defining companies.",
-        notableInvestments: ["Myntra", "Dream11", "Urban Ladder"],
-        socials: { linkedin: "#", twitter: "#", website: "#" },
-      },
-      {
-        id: 6,
-        fullname: "Girish Mathrubootham",
-        location: "Chennai",
-        industry: ["SaaS", "DeepTech"],
-        fundingStage: ["Pre-Seed", "Seed"],
-        bio: "Founder of Freshworks. Actively invests in and mentors early-stage SaaS founders from India building for the world.",
-        notableInvestments: ["Chargebee", "Kissflow", "Whatfix"],
-        socials: { linkedin: "#", twitter: "#", website: "#" },
-      },
-    ],
-    []
-  );
+  const { getInvestors, investorList, setInvestorList } =
+    useContext(GetInvestorContext);
 
   const [filters, setFilters] = useState({
     industry: [],
@@ -110,8 +47,6 @@ const Investor = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
-
-  const [investorList, setInvestorList] = useState(allInvestors);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -154,26 +89,9 @@ const Investor = () => {
     },
     [] // No dependencies needed as it uses the functional form of setState
   );
-
-  // Fetch startups from the database when the component mounts
   useEffect(() => {
-    const getInvestors = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_API_URL}/investors`
-        );
-        if (response.data.length > 0) {
-          setInvestorList(response.data);
-        } else {
-          setInvestorList(allInvestors);
-        }
-      } catch (error) {
-        console.error("Error fetching investors:", error);
-        setInvestorList(allInvestors);
-      }
-    };
     getInvestors();
-  }, [allInvestors]);
+  }, []);
 
   // const filteredStartups = useMemo(() => {
   //   return startupList.filter((startup) => {
@@ -210,7 +128,7 @@ const Investor = () => {
         filters.fundingStage.includes(investor.fundingStage);
       return searchMatch && industryMatch && locationMatch && stageMatch;
     });
-  }, [filters, searchTerm, investorList]);
+  }, [getInvestors, filters, searchTerm, investorList]);
 
   return (
     <div className="min-h-screen bg-[#0D1117] text-slate-300 font-inter">
@@ -230,7 +148,7 @@ const Investor = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           {/* Filters Sidebar */}
           <FilterContent
-            startupList={allInvestors}
+            startupList={investorList}
             filters={filters}
             onFilterChange={handleFilterChange}
           />
@@ -239,9 +157,9 @@ const Investor = () => {
           <main className="lg:col-span-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredInvestors.length > 0 ? (
-                filteredInvestors.map((investor) => (
+                filteredInvestors.map((investor, index) => (
                   <div
-                    key={investor._id || investor.id}
+                    key={index}
                     className="group bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/80 p-6 transition-all duration-300  flex flex-col"
                   >
                     <div className="flex items-center gap-4 mb-4">
@@ -307,7 +225,7 @@ const Investor = () => {
                         </a>
                       </div>
                       <Link
-                        to={`/investor/${investor._id}`}
+                        to={`/investor/${index}`}
                         className="text-slate-400 mt-4 bg-cyan-400 rounded-md px-4 py-1 hover:bg-cyan-600/50 "
                       >
                         View

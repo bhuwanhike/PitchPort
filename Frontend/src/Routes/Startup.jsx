@@ -27,91 +27,12 @@ import { AuthContext } from "../contexts/auth-context";
 import SearchBar from "../components/SearchBar";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import { GetStartupContext } from "../contexts/GetStartup";
 
 const Startup = () => {
-  const allStartups = [
-    {
-      id: 1,
-      startupName: "InnovateX",
-      industry: "FinTech",
-      location: "Bengaluru",
-      fundingStage: "Series A",
-      fundingAmount: 2500000,
-      idea: "AI-driven platform for personal finance management.",
-    },
-    {
-      id: 2,
-      startupName: "GreenEnergy Co.",
-      industry: "ClimateTech",
-      location: "New Delhi",
-      fundingStage: "Seed",
-      fundingAmount: 500000,
-      idea: "Developing next-gen solar panel technology.",
-    },
-    {
-      id: 3,
-      startupName: "HealthConnect AI",
-      industry: "HealthTech",
-      location: "Mumbai",
-      fundingStage: "Series B",
-      fundingAmount: 10000000,
-      idea: "Connecting patients with doctors via telemedicine.",
-    },
-    {
-      id: 4,
-      startupName: "CarbonCraft",
-      industry: "ClimateTech",
-      location: "Bengaluru",
-      fundingStage: "Pre-Seed",
-      fundingAmount: 150000,
-      idea: "Creating building materials from captured carbon.",
-    },
-    {
-      id: 5,
-      startupName: "DataDrive",
-      industry: "SaaS",
-      location: "Pune",
-      fundingStage: "Seed",
-      fundingAmount: 750000,
-      idea: "Cloud-based data analytics for small businesses.",
-    },
-    {
-      id: 6,
-      startupName: "Groww",
-      industry: "FinTech",
-      location: "Bengaluru",
-      fundingStage: "Series E",
-      fundingAmount: 393000000,
-      idea: "User-friendly platform for stocks and mutual funds.",
-    },
-    {
-      id: 7,
-      startupName: "Licious",
-      industry: "FoodTech",
-      location: "Bengaluru",
-      fundingStage: "Series F",
-      fundingAmount: 490000000,
-      idea: "Online delivery of fresh meat and seafood.",
-    },
-    {
-      id: 8,
-      startupName: "CureBay",
-      industry: "HealthTech",
-      location: "Bhubaneswar",
-      fundingStage: "Seed",
-      fundingAmount: 6000000,
-      idea: "Hybrid healthcare for rural India.",
-    },
-    {
-      id: 9,
-      startupName: "SynthWave Labs",
-      industry: "SaaS",
-      location: "Mumbai",
-      fundingStage: "Series A",
-      fundingAmount: 3000000,
-      idea: "AI-powered music composition tools for creators.",
-    },
-  ];
+  const { getStartups, startupList, setStartupList } =
+    useContext(GetStartupContext);
+
   const [searchTerm, setSearchTerm] = useState("");
   const { isLoggedIn } = useContext(AuthContext);
   const [filters, setFilters] = useState({
@@ -119,9 +40,9 @@ const Startup = () => {
     location: [],
     fundingStage: [],
   });
-
-  const [startupList, setStartupList] = useState(allStartups);
-
+  useEffect(() => {
+    getStartups();
+  }, []);
   const [showForm, setShowForm] = useState(false);
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -136,46 +57,22 @@ const Startup = () => {
   };
 
   // Add startup
-  const addStartup = useCallback(
-    async (startupData) => {
-      try {
-        // Assuming the backend returns the newly created startup with an _id
-        const response = await axios.post(
-          `${import.meta.env.VITE_BACKEND_API_URL}/addstartup`,
-          startupData
-        );
-        // Add the new startup to the list
-        setStartupList((prev) => [response.data, ...prev]);
-        setShowForm(false); // Close the modal on success
-      } catch (error) {
-        console.error("Error adding startup:", error);
-        // Optionally, show an error message to the user
-      }
-    },
-    [] // No dependencies needed as it uses the functional form of setState
-  );
+  const addStartup = useCallback(async (startupData) => {
+    try {
+      // Assuming the backend returns the newly created startup with an _id
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API_URL}/addstartup`,
+        startupData
+      );
+      // Add the new startup to the list
+      setStartupList((prev) => [response.data, ...prev]);
+      setShowForm(false); // Close the modal on success
+    } catch (error) {
+      console.error("Error adding startup:", error);
+      // Optionally, show an error message to the user
+    }
+  }, []);
 
-  // Fetch startups from the database when the component mounts
-  useEffect(() => {
-    const getStartups = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_API_URL}/startups`
-        );
-        if (response.data.length > 0) {
-          setStartupList(response.data);
-        } else {
-          setStartupList(allStartups);
-        }
-      } catch (error) {
-        console.error("Error fetching startups:", error);
-        setStartupList(allStartups);
-      }
-    };
-    getStartups();
-  }, []); // Empty dependency array ensures this runs only once on mount
-
-  // Check for the action to show the form when the component mounts
   useEffect(() => {
     if (searchParams.get("action") === "showForm") {
       setShowForm(true);
@@ -205,7 +102,7 @@ const Startup = () => {
         filters.fundingStage.includes(startup.fundingStage);
       return searchMatch && industryMatch && locationMatch && fundingStageMatch;
     });
-  }, [filters, searchTerm, startupList]);
+  }, [getStartups, filters, searchTerm, startupList]);
 
   return (
     <div className="min-h-screen bg-[#0D1117] text-slate-300 font-inter">
@@ -232,9 +129,9 @@ const Startup = () => {
           <main className="lg:col-span-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredStartups.length > 0 ? (
-                filteredStartups.map((startup) => (
+                filteredStartups.map((startup, index) => (
                   <div
-                    key={startup._id || startup.id} // Use _id from MongoDB
+                    key={index} // Use _id from MongoDB
                     className="group bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/80 p-6 transition-all duration-300 hover:bg-slate-700/50 hover:border-cyan-400/50 hover:-translate-y-1"
                   >
                     <div className="flex items-start gap-4 mb-4">
@@ -277,7 +174,7 @@ const Startup = () => {
                       </p>
                     </div>
                     <Link
-                      to={`/startup/${startup._id}`} // Use _id from MongoDB
+                      to={`/startup/${index}`} // Use _id from MongoDB
                       className="mt-6 block w-full text-center bg-slate-700/80 text-cyan-400 font-semibold py-2 rounded-lg hover:bg-slate-700 transition-colors"
                     >
                       View Pitch

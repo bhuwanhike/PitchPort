@@ -8,8 +8,8 @@ import loginRoute from "./Route/login.route.js";
 import userRoute from "./Route/user.route.js";
 import addInvestorRoute from "./Route/addInvestor.route.js";
 import addStartupRoute from "./Route/addstartup.route.js";
-import startupsRoute from "./Route/startups.route.js";
-import investorsRoute from "./Route/investors.route.js";
+import startupsRoute from "./Route/addstartup.route.js";
+import investorsRoute from "./Route/addInvestor.route.js";
 import cors from "cors";
 const app = express();
 

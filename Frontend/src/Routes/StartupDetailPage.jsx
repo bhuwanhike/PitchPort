@@ -1,54 +1,21 @@
-import React, { useEffect, useState } from "react";
+// import React, { useEffect, useState } from "react";
 import { MapPin, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
-
+import { useContext, useEffect } from "react";
+import { GetStartupContext } from "../contexts/GetStartup";
+import { useParams } from "react-router-dom";
 // import { useParams } from "react-router-dom"; // Import useParams hook
 
 const StartupDetailPage = () => {
   //   const { startupId } = useParams(); // Get the dynamic ID from the URL
-  const [startupData, setStartupData] = useState(null);
-  //   const [loading, setLoading] = useState(true);
-  //   const [error, setError] = useState(null);
 
-  //   useEffect(() => {
-  //     const fetchStartupDetails = async () => {
-  //       setLoading(true);
-  //       setError(null);
-  //       try {
-  //         // --- IMPORTANT: Replace with your actual API endpoint ---
-  //         // This is where you'd fetch the specific startup's data using its ID
-  //         const response = await fetch(
-  //           `http://localhost:5000/startups/${startupId}`
-  //         );
-  //         if (!response.ok) {
-  //           throw new Error(`HTTP error! status: ${response.status}`);
-  //         }
-  //         const data = await response.json();
-  //         setStartupData(data);
-  //       } catch (e) {
-  //         setError(e.message);
-  //       } finally {
-  //         setLoading(false);
-  //       }
-  //     };
+  const { getStartups, startupList } = useContext(GetStartupContext);
+  const { startupId } = useParams();
 
-  //     if (startupId) {
-  //       // Only fetch if startupId is available
-  //       fetchStartupDetails();
-  //     }
-  //   }, [startupId]); // Re-run effect if startupId changes
+  useEffect(() => {
+    getStartups();
+  }, []);
 
-  //   if (loading) {
-  //     return <div>Loading startup details...</div>;
-  //   }
-
-  //   if (error) {
-  //     return <div>Error loading startup: {error}</div>;
-  //   }
-
-  //   if (!startupData) {
-  //     return <div>Startup not found.</div>;
-  //   }
   const containerClasses =
     "min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 pt-16 pb-8 box-border"; // Added pt-16 for header space
 
@@ -63,7 +30,7 @@ const StartupDetailPage = () => {
       <div className={cardClasses}>
         <div className="flex items-start justify-between gap-4 mb-4">
           <img
-            src={`https://logo.clearbit.com/${"Startup Name"
+            src={`https://logo.clearbit.com/${startupList[startupId].startupName
               .toLowerCase()
               .replace(/\s/g, "")}.com`}
             alt={`Startup Name Logo`}
@@ -78,19 +45,21 @@ const StartupDetailPage = () => {
           <div className=" w-140 flex flex-col gap-4">
             <div>
               <h3 className="text-4xl font-bold text-white font-poppins">
-                {"Startup Name"}
+                {startupList[startupId].startupName}
               </h3>
-              <p className="text-md text-slate-400">{"Industry"}</p>
+              <p className="text-md text-slate-400">
+                {startupList[startupId].industry}
+              </p>
             </div>
 
             <div className="text-xs text-slate-400 space-y-2">
               <p className="flex items-center text-lg">
                 <MapPin className="w-5 h-5 mr-2 text-cyan-400" />{" "}
-                {"Location : "}
+                {"Location : " + startupList[startupId].location}
               </p>
               <p className="flex items-center text-lg ">
                 <DollarSign className="w-5 h-5 mr-2 text-cyan-400" />{" "}
-                {"Funding Amount : "}
+                {"Funding Amount : " + startupList[startupId].fundingAmount}
               </p>
             </div>
           </div>
@@ -107,23 +76,13 @@ const StartupDetailPage = () => {
               Startup Idea
             </h2>
             <p className="text-base leading-relaxed">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nihil
-              eligendi suscipit laudantium temporibus quos vitae unde, corrupti
-              similique dolores, in aspernatur? Beatae iure reprehenderit
-              placeat architecto sapiente maxime quaerat repellendus. Ex, quas
-              sed atque odio quisquam qui? Recusandae sequi voluptatum veritatis
-              consequatur, cum ipsum dolores atque, ab at doloribus tempora.
+              {startupList[startupId].idea}
             </p>
           </div>
           <div>
             <h2 className="text-xl font-semibold text-white mb-4">Team Info</h2>
             <p className="text-base leading-relaxed">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nihil
-              eligendi suscipit laudantium temporibus quos vitae unde, corrupti
-              similique dolores, in aspernatur? Beatae iure reprehenderit
-              placeat architecto sapiente maxime quaerat repellendus. Ex, quas
-              sed atque odio quisquam qui? Recusandae sequi voluptatum veritatis
-              consequatur, cum ipsum dolores atque, ab at doloribus tempora.
+              {startupList[startupId].teamInfo}
             </p>
           </div>
           <div>
@@ -131,12 +90,7 @@ const StartupDetailPage = () => {
               Funding Details
             </h2>
             <p className="text-base leading-relaxed">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nihil
-              eligendi suscipit laudantium temporibus quos vitae unde, corrupti
-              similique dolores, in aspernatur? Beatae iure reprehenderit
-              placeat architecto sapiente maxime quaerat repellendus. Ex, quas
-              sed atque odio quisquam qui? Recusandae sequi voluptatum veritatis
-              consequatur, cum ipsum dolores atque, ab at doloribus tempora.
+              {startupList[startupId].fundingDetails}
             </p>
           </div>
         </div>

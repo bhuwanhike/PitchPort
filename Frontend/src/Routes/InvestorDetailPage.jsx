@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { MapPin, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
+import { GetInvestorContext } from "../contexts/GetInvestor";
+import { useParams } from "react-router-dom";
 
 const InvestorDetailPage = () => {
+  const { investorId } = useParams();
+  const { getInvestors, investorList } = useContext(GetInvestorContext);
+  useEffect(() => {
+    getInvestors();
+  }, []);
   const containerClasses =
     "min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 pt-16 pb-8 box-border"; // Added pt-16 for header space
 
@@ -16,7 +23,7 @@ const InvestorDetailPage = () => {
       <div className={cardClasses}>
         <div className="flex items-start justify-between gap-4 mb-4">
           <img
-            src={`https://logo.clearbit.com/${"Investor Name"
+            src={`https://logo.clearbit.com/${investorList[investorId].fullname
               .toLowerCase()
               .replace(/\s/g, "")}.com`}
             alt={`Investor Name Logo`}
@@ -31,19 +38,21 @@ const InvestorDetailPage = () => {
           <div className=" w-140 flex flex-col gap-4">
             <div>
               <h3 className="text-4xl font-bold text-white font-poppins">
-                {"Investor Name"}
+                {investorList[investorId].fullname}
               </h3>
-              <p className="text-md text-slate-400">{"Industry"}</p>
+              <p className="text-md text-slate-400">
+                {investorList[investorId].industry}
+              </p>
             </div>
 
             <div className="text-xs text-slate-400 space-y-2">
               <p className="flex items-center text-lg">
                 <MapPin className="w-5 h-5 mr-2 text-cyan-400" />{" "}
-                {"Location : "}
+                {"Location : " + investorList[investorId].location}
               </p>
               <p className="flex items-center text-lg ">
                 <DollarSign className="w-5 h-5 mr-2 text-cyan-400" />{" "}
-                {"Funding Amount : "}
+                {"Funding Stage : " + investorList[investorId].fundingStage}
               </p>
             </div>
           </div>
@@ -60,12 +69,7 @@ const InvestorDetailPage = () => {
               Investor Bio
             </h2>
             <p className="text-base leading-relaxed">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nihil
-              eligendi suscipit laudantium temporibus quos vitae unde, corrupti
-              similique dolores, in aspernatur? Beatae iure reprehenderit
-              placeat architecto sapiente maxime quaerat repellendus. Ex, quas
-              sed atque odio quisquam qui? Recusandae sequi voluptatum veritatis
-              consequatur, cum ipsum dolores atque, ab at doloribus tempora.
+              {investorList[investorId].bio}
             </p>
           </div>
           <div>
@@ -73,12 +77,7 @@ const InvestorDetailPage = () => {
               Notable Investments
             </h2>
             <p className="text-base leading-relaxed">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nihil
-              eligendi suscipit laudantium temporibus quos vitae unde, corrupti
-              similique dolores, in aspernatur? Beatae iure reprehenderit
-              placeat architecto sapiente maxime quaerat repellendus. Ex, quas
-              sed atque odio quisquam qui? Recusandae sequi voluptatum veritatis
-              consequatur, cum ipsum dolores atque, ab at doloribus tempora.
+              {investorList[investorId].notableInvestments}
             </p>
           </div>
           <div>
@@ -86,12 +85,7 @@ const InvestorDetailPage = () => {
               Funding Details
             </h2>
             <p className="text-base leading-relaxed">
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nihil
-              eligendi suscipit laudantium temporibus quos vitae unde, corrupti
-              similique dolores, in aspernatur? Beatae iure reprehenderit
-              placeat architecto sapiente maxime quaerat repellendus. Ex, quas
-              sed atque odio quisquam qui? Recusandae sequi voluptatum veritatis
-              consequatur, cum ipsum dolores atque, ab at doloribus tempora.
+              {investorList[investorId].fundingDetails}
             </p>
           </div>
         </div>
