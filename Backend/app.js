@@ -1,0 +1,39 @@
+import express from "express";
+import dotenv from "dotenv";
+import connectToDB from "./config/db.js";
+dotenv.config();
+connectToDB();
+import registerRoute from "./Route/Register.route.js";
+import loginRoute from "./Route/login.route.js";
+import userRoute from "./Route/user.route.js";
+import addInvestorRoute from "./Route/addInvestor.route.js";
+import addStartupRoute from "./Route/addstartup.route.js";
+import startupsRoute from "./Route/startups.route.js";
+import investorsRoute from "./Route/investors.route.js";
+import cors from "cors";
+const app = express();
+
+const PORT = process.env.PORT || 3000;
+
+const corsOptions = {
+  origin: "http://localhost:5173",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Add all methods your frontend will use
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.use(express.json());
+
+// Import and use routes
+app.use("/register", registerRoute);
+app.use("/login", loginRoute);
+app.use("/user", userRoute);
+app.use("/addinvestor", addInvestorRoute);
+app.use("/investors", investorsRoute);
+app.use("/addstartup", addStartupRoute);
+app.use("/startups", startupsRoute);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
