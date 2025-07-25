@@ -205,7 +205,7 @@ const Startup = () => {
         className="fixed bottom-6 right-6 flex items-center gap-2 px-5 py-3 rounded-full bg-cyan-400 text-white font-bold shadow-lg shadow-cyan-500/20 hover:scale-105 hover:bg-cyan-300 transition-all transform z-50 "
       >
         <PlusCircle className="w-5 h-5" />
-        Submit Startup
+        Add Startup
       </button>
 
       {/* Submit Form Modal */}
