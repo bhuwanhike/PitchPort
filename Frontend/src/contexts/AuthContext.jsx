@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AuthContext } from "./auth-context";
 import { jwtDecode } from "jwt-decode";
+// import axios from "axios";
 
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -39,6 +40,24 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
+  const getLoggedInUser = async () => {
+    const token = localStorage.getItem("token");
+    const decoded = jwtDecode(token);
+    const username = (await decoded.username) || decoded.sub;
+    const email = (await decoded.email) || decoded.email;
+    const role = (await decoded.role) || decoded.role;
+    if (token) {
+      return { username, email, role };
+    }
+    // return response.data;
+  };
+  // const getRegisterUserInfo = async () => {
+  //   const userInfo = await axios.get(
+  //     `${import.meta.env.VITE_BACKEND_API_URL}/register`
+  //   );
+  //   return userInfo;
+  // };
+
   const logout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
@@ -58,6 +77,8 @@ export const AuthProvider = ({ children }) => {
         Fletter,
         role,
         setRole,
+        getLoggedInUser,
+        // getRegisterUserInfo,
         // startupForm,
         // setStartupFormView,
         // investorForm,

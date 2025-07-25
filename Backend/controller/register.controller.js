@@ -19,4 +19,13 @@ const registerController = async (req, res) => {
   }
 };
 
-export default registerController;
+const getRegisterUserInfo = async (req, res) => {
+  try {
+    const userInfo = await User.find();
+    res.status(200).json(userInfo);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+export { registerController, getRegisterUserInfo };

@@ -13,7 +13,7 @@ const Settings = () => {
   return (
     <div className="min-h-screen flex bg-[#0D1117]  font-inter">
       {/* Sidebar Navigation */}
-      <aside className="w-64 flex-shrink-0 bg-slate-900/80 backdrop-blur-sm border-r border-slate-800 flex flex-col p-6 pt-20">
+      <aside className="w-64 flex-shrink-0 bg-slate-900/80 backdrop-blur-sm border-r border-slate-800 flex flex-col p-6 pt-20 fixed left-0 top-0 bottom-0 ">
         <Link to="/" className="flex items-center gap-3 mb-10">
           <SettingsIcon className="w-7 h-7 text-cyan-400" />
           <p className="text-3xl font-bold text-white font-poppins">Settings</p>
@@ -49,7 +49,7 @@ const Settings = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 sm:p-8 md:p-10">
+      <main className="flex-1 p-6 sm:p-8 md:p-10 ml-64 overflow-y-auto">
         {/* The Outlet will render the component for the active nested route */}
         <Outlet />
       </main>

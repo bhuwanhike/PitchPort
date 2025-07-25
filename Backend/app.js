@@ -10,6 +10,7 @@ import addInvestorRoute from "./Route/addInvestor.route.js";
 import addStartupRoute from "./Route/addstartup.route.js";
 import startupsRoute from "./Route/addstartup.route.js";
 import investorsRoute from "./Route/addInvestor.route.js";
+import profileSettingsRoute from "./Route/profileSettings.route.js";
 import cors from "cors";
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/addinvestor", addInvestorRoute);
 app.use("/investors", investorsRoute);
 app.use("/addstartup", addStartupRoute);
 app.use("/startups", startupsRoute);
+app.use("/profileSettings", profileSettingsRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

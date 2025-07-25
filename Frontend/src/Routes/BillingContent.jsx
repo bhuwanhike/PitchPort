@@ -52,7 +52,7 @@ const BillingContent = () => {
   const { currentPlan, paymentMethod, billingHistory } = billingData;
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn py-8">
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-white font-poppins">

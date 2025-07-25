@@ -10,7 +10,7 @@ const Register = () => {
     username: "",
     email: "",
     password: "",
-    role: "",
+    role: "startup",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -27,6 +27,7 @@ const Register = () => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    window.location.href = "/login";
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_API_URL}/register`, // Make sure this endpoint is correct
@@ -122,6 +123,7 @@ const Register = () => {
 
             <div className="relative">
               <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+
               <select
                 id="role"
                 name="role"
@@ -131,15 +133,15 @@ const Register = () => {
                 onChange={handleChange}
               >
                 {role === "startup" ? (
-                  <div>
+                  <>
                     <option value="startup">Startup</option>
                     <option value="investor">Investor</option>
-                  </div>
+                  </>
                 ) : (
-                  <div>
+                  <>
                     <option value="investor">Investor</option>
                     <option value="startup">Startup</option>
-                  </div>
+                  </>
                 )}
               </select>
             </div>
