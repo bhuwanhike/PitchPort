@@ -22,13 +22,13 @@ const SettingsCard = ({ title, description, children }) => (
 
 // Reusable component for a form field - LABELS ALIGNED SIDE-BY-SIDE
 const FormField = ({ label, children }) => (
-  <div className="flex   items-center w-[80%] gap-15 pl-5 pr-5">
-    <label className="text-lg font-medium text-slate-200 w-[15%]">
+  <div className="flex items-center w-full gap-2 pl-5 pr-5">
+    <label className="text-lg font-medium text-slate-200 w-[25%]">
       {" "}
       {/* Label for left column, right aligned */}
       {label}
     </label>
-    <div className="w-[85%]">{children}</div>{" "}
+    <div className="w-[90%]">{children}</div>{" "}
     {/* This div contains the input, takes remaining space */}
   </div>
 );
@@ -98,7 +98,7 @@ const ProfileContent = () => {
   // console.log(result);
   return (
     // Max-width, centering, and generous top/bottom padding for the main content
-    <div className="space-y-12 animate-fadeInforProfile max-w-8xl mx-auto py-8">
+    <div className="space-y-12 animate-fadeInforProfile max-w-8xl mx-auto py-8 px-18">
       <div>
         <h1 className="text-3xl font-bold text-white font-poppins">
           Profile Settings
@@ -113,7 +113,7 @@ const ProfileContent = () => {
             title="Profile Picture"
             description="Update your profile picture."
           >
-            <div className="flex flex-col w-100 h-100 items-center gap-y-4 md:gap-x-8">
+            <div className="flex flex-col w-100 h-80 items-center gap-y-4 md:gap-x-8">
               <div className="flex flex-col items-center gap-15">
                 <div className="relative w-80  group">
                   {/* Larger avatar */}
@@ -150,7 +150,7 @@ const ProfileContent = () => {
             </div>
           </SettingsCard>
           {/* Personal Information Section */}
-          <div className="w-[70%] h-full">
+          <div className="w-[70%] ">
             <SettingsCard
               title="Personal Information"
               description="Edit your personal details."
@@ -164,7 +164,7 @@ const ProfileContent = () => {
                   className="input-field "
                   placeholder="Full Name"
                 />
-                {console.log(profile.username)}
+                {/* {console.log(profile.username)} */}
               </FormField>
               <FormField label="Username">
                 <div className="relative">
@@ -176,7 +176,7 @@ const ProfileContent = () => {
                     name="username"
                     value={profile.username}
                     onChange={handleChange}
-                    className="input-field !pl-10" // Adjusted padding for icon
+                    className="input-field !pl-8" // Adjusted padding for icon
                     placeholder="yourusername"
                   />
                 </div>

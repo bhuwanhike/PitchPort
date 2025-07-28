@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { MessageSquare, X, Send, Bot } from "lucide-react";
 // You'll need to import your actual AuthContext
 // import { AuthContext } from '../contexts/auth-context';
@@ -7,69 +7,77 @@ import { MessageSquare, X, Send, Bot } from "lucide-react";
 const AuthContext = React.createContext({ isLoggedIn: true });
 
 const Chatbot = () => {
-  const { isLoggedIn } = useContext(AuthContext);
+  // const { isLoggedIn } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Hello! I'm PitchBot, your AI assistant. How can I help you find the perfect match today?",
-      sender: "bot",
-    },
-    {
-      id: 2,
-      text: "I'm looking for early-stage FinTech startups in Bengaluru.",
-      sender: "user",
-    },
-    {
-      id: 3,
-      text: "Excellent! I've found 3 promising startups matching your criteria. Would you like to see them?",
-      sender: "bot",
-    },
-  ]);
+  // const [messages, setMessages] = useState([
+  //   {
+  //     id: 1,
+  //     text: "Hello! I'm PitchBot, your AI assistant. How can I help you find the perfect match today?",
+  //     sender: "bot",
+  //   },
+  //   {
+  //     id: 2,
+  //     text: "I'm looking for early-stage FinTech startups in Bengaluru.",
+  //     sender: "user",
+  //   },
+  //   {
+  //     id: 3,
+  //     text: "Excellent! I've found 3 promising startups matching your criteria. Would you like to see them?",
+  //     sender: "bot",
+  //   },
+  // ]);
   const [newMessage, setNewMessage] = useState("");
   const chatEndRef = useRef(null);
-
-  useEffect(() => {
-    // Auto-scroll to the latest message
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const handleSendMessage = (e) => {
+  const handleSendMessage = useCallback(async (e) => {
     e.preventDefault();
-    if (newMessage.trim() === "") return;
+    try {
+      const query = await fetch(
+        `${import.meta.env.VITE_BACKEND_API_URL}/chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: newMessage }),
+        }
+      );
+      console.log("messg sent");
+    } catch (error) {
+      console.log("error", error);
+    }
+    // console.log(newMessage);
+  }, []);
 
-    const userMessage = { id: Date.now(), text: newMessage, sender: "user" };
-    setMessages((prev) => [...prev, userMessage]);
-    setNewMessage("");
-
-    // Mock bot response
-    setTimeout(() => {
-      const botResponse = {
-        id: Date.now() + 1,
-        text: "Searching for more details...",
-        sender: "bot",
-      };
-      setMessages((prev) => [...prev, botResponse]);
-    }, 1000);
+  const getResponse = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_API_URL}/chat`,
+        {
+          method: "GET",
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log("error found here", error);
+    }
   };
-
-  // Don't render the component if the user is not logged in
-  if (!isLoggedIn) {
-    return null;
-  }
+  useEffect(() => {
+    getResponse();
+  }, [handleSendMessage]);
 
   return (
     <>
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-10 right-6 w-96 h-[32rem] z-50 animate-slideUp">
+        <div className="fixed bottom-55 right-6 w-96 h-[32rem] z-50 animate-slideUp">
           {/* Glow Effect */}
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-cyan-500 rounded-md blur-lg opacity-75"></div>
 
           {/* Chat Window Content */}
-          <div className="relative w-full h-full bg-slate-800/80 backdrop-blur-lg border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+          <div className="relative w-full h-full bg-slate-800/80 backdrop-blur-lg border border-slate-700/80 rounded-2xl shadow-sm flex flex-col overflow-hidden ">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-700/80 flex-shrink-0">
+            <div className="flex items-center justify-between p-4 border-b border-slate-700/80 flex-shrink-0  ">
               <div className="flex items-center gap-3">
                 <Bot className="w-6 h-6 text-cyan-400" />
                 <div>
@@ -86,8 +94,8 @@ const Chatbot = () => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-grow p-4 space-y-4 overflow-y-auto">
-              {messages.map((message) => (
+            <div className="flex-grow p-4 space-y-4 overflow-y-auto no-scrollbar">
+              {/* {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${
@@ -97,14 +105,17 @@ const Chatbot = () => {
                   <div
                     className={`max-w-xs px-4 py-2 rounded-2xl ${
                       message.sender === "user"
-                        ? "bg-cyan-500 text-slate-900 rounded-br-none"
-                        : "bg-slate-700 text-slate-300 rounded-bl-none"
+                        ? "bg-pink-700 text-white  rounded-br-none"
+                        : "bg-cyan-500 text-slate-900 rounded-bl-none"
                     }`}
                   >
                     <p className="text-sm">{message.text}</p>
                   </div>
                 </div>
-              ))}
+              ))} */}
+              <div className="bg-cyan-500 text-slate-900 rounded-bl-none w-fit rounded-md p-2">
+                hello
+              </div>
               <div ref={chatEndRef} />
             </div>
 
@@ -116,14 +127,18 @@ const Chatbot = () => {
               >
                 <input
                   type="text"
+                  name="message"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Ask about startups..."
+                  placeholder="Ask me anything..."
                   className="w-full bg-slate-700/50 border border-slate-600 rounded-full py-2 px-4 text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
+
+                {/* {console.log(newMessage)} */}
+                {/* send button */}
                 <button
                   type="submit"
-                  className="bg-cyan-400 text-slate-900 p-2.5 rounded-full hover:bg-cyan-300 transition-colors"
+                  className="!bg-cyan-400 text-slate-900 p-2.5 !rounded-full hover:bg-cyan-600 transition-colors cursor-pointer"
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -149,8 +164,6 @@ const Chatbot = () => {
           </button>
         </div>
       </div>
-
-  
     </>
   );
 };

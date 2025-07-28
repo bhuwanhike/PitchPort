@@ -32,6 +32,7 @@ function App() {
     "/settings/billing",
   ];
   return (
+   
     <StartupProvider>
       <InvestorProvider>
         <AuthProvider>

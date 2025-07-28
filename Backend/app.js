@@ -11,6 +11,9 @@ import addStartupRoute from "./Route/addstartup.route.js";
 import startupsRoute from "./Route/addstartup.route.js";
 import investorsRoute from "./Route/addInvestor.route.js";
 import profileSettingsRoute from "./Route/profileSettings.route.js";
+
+import chatbotRoute from "./Route/chatbot.route.js";
+// import chatbotResultRoute from "./Route/chatbot.route.js";
 import cors from "cors";
 const app = express();
 
@@ -35,6 +38,8 @@ app.use("/investors", investorsRoute);
 app.use("/addstartup", addStartupRoute);
 app.use("/startups", startupsRoute);
 app.use("/profileSettings", profileSettingsRoute);
+app.use("/chat", chatbotRoute);
+// app.use("/chatresult", chatbotRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

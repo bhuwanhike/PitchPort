@@ -113,7 +113,7 @@ const DashboardContent = () => {
     dashboardData;
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn py-8 px-18">
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-white font-poppins">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { CreditCard, Download, CheckCircle } from "lucide-react";
 
 // --- DUMMY DATA ---
@@ -51,8 +51,9 @@ const SettingsCard = ({ title, description, children, footer }) => (
 const BillingContent = () => {
   const { currentPlan, paymentMethod, billingHistory } = billingData;
 
+  const [isTrue, setIsTrue] = useState(false);
   return (
-    <div className="space-y-8 animate-fadeIn py-8">
+    <div className="space-y-8 animate-fadeIn py-8 px-18">
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-white font-poppins">
@@ -137,42 +138,46 @@ const BillingContent = () => {
         title="Billing History"
         description="Download your past invoices for your records."
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-slate-400 uppercase">
-              <tr>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Amount</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Invoice</th>
-              </tr>
-            </thead>
-            <tbody>
-              {billingHistory.map((invoice) => (
-                <tr key={invoice.id} className="border-t border-slate-700/80">
-                  <td className="px-4 py-4 text-slate-300">{invoice.date}</td>
-                  <td className="px-4 py-4 text-white font-medium">
-                    ${invoice.amount.toFixed(2)}
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className="bg-green-500/10 text-green-400 text-xs font-semibold px-2 py-1 rounded-full">
-                      {invoice.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    <a
-                      href="#"
-                      className="flex items-center justify-end gap-2 text-cyan-400 hover:text-cyan-300 font-semibold"
-                    >
-                      <Download className="w-4 h-4" />
-                      PDF
-                    </a>
-                  </td>
+        {isTrue ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-slate-400 uppercase">
+                <tr>
+                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">Amount</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Invoice</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {billingHistory.map((invoice) => (
+                  <tr key={invoice.id} className="border-t border-slate-700/80">
+                    <td className="px-4 py-4 text-slate-300">{invoice.date}</td>
+                    <td className="px-4 py-4 text-white font-medium">
+                      ${invoice.amount.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="bg-green-500/10 text-green-400 text-xs font-semibold px-2 py-1 rounded-full">
+                        {invoice.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      <a
+                        href="#"
+                        className="flex items-center justify-end gap-2 text-cyan-400 hover:text-cyan-300 font-semibold"
+                      >
+                        <Download className="w-4 h-4" />
+                        PDF
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div>No history records yet.</div>
+        )}
       </SettingsCard>
 
       <style jsx>{`

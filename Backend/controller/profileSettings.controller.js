@@ -34,10 +34,10 @@ const profileSettingsController = async (req, res) => {
       //     { $set: { username, role, email } },
       //     { new: true }
       //   );
-      const token = await user.generateToken();
+      // const token = await user.generateToken();
       res
         .status(201)
-        .json({ message: "User registered successfully", token: token });
+        .json({ message: "User registered successfully"});
     } else {
       console.log("invalid credentials from the profileSettings Controller");
     }

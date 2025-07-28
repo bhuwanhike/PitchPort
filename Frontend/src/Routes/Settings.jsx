@@ -24,7 +24,7 @@ const Settings = () => {
               Profile
             </SettingsLink>
             <SettingsLink to="/settings/dashboard" icon={<User />}>
-              Dashboard
+              Dashboard - Under Development
             </SettingsLink>
             <SettingsLink to="/settings/security" icon={<Shield />}>
               Security
