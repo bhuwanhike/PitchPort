@@ -8,10 +8,8 @@ const Navbar = () => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const { isLoggedIn, Fletter, logout } = useContext(AuthContext);
-
   const settingsRef = useRef(null);
 
-  // Close settings dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (settingsRef.current && !settingsRef.current.contains(event.target)) {
@@ -32,22 +30,20 @@ const Navbar = () => {
   return (
     <nav className="bg-slate-900/80 backdrop-blur-sm px-6 py-3 sticky top-0 z-50 border-b border-slate-800">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Left side: Logo and Name */}
         <div className="flex items-center space-x-2">
-          {/* Logo */}
-          <img src="/pp.svg" alt="" className="w-8 h-8" />
+          <img src="/pp.svg" alt="Logo" className="w-8 h-8" />
           <Link
             to="/"
-            className="flex items-center space-x-2 font-semibold"
+            className="text-3xl font-bold !text-pink-600 font-poppins logo-animation"
             onClick={closeAllMenus}
           >
-            <span className="logo-animation text-3xl font-bold !text-pink-600 font-poppins">
-              PitchPort
-            </span>
+            PitchPort
           </Link>
         </div>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-8 !text-slate-300 font-semibold items-center text-[1.1rem]">
+        {/* Center Menu (Navigation Links) */}
+        <div className="hidden md:flex space-x-8 ml-auto mr-8 text-slate-300 font-semibold items-center text-[1.1rem]">
           <NavLink
             to="/"
             className={({ isActive }) =>
@@ -90,7 +86,7 @@ const Navbar = () => {
           </NavLink>
         </div>
 
-        {/* Desktop Auth Section */}
+        {/* Right Side: Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
           {!isLoggedIn ? (
             <Link to="/login">
@@ -143,60 +139,16 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden mt-4 pt-4 border-t border-slate-800">
           <div className="flex flex-col space-y-4 text-lg text-center">
-            <Link
-              to="/"
-              className="block px-4 py-2 hover:bg-slate-700/50"
-              onClick={closeAllMenus}
-            >
-              Explore
-            </Link>
-            <Link
-              to="/startups"
-              className="block px-4 py-2 hover:bg-slate-700/50"
-              onClick={closeAllMenus}
-            >
-              Startups
-            </Link>
-            <Link
-              to="/investors"
-              className="block px-4 py-2 hover:bg-slate-700/50"
-              onClick={closeAllMenus}
-            >
-              Investors
-            </Link>
-            <Link
-              to="/about"
-              className="block px-4 py-2 hover:bg-slate-700/50"
-              onClick={closeAllMenus}
-            >
-              About
-            </Link>
+            <Link to="/" className="block px-4 py-2 hover:bg-slate-700/50" onClick={closeAllMenus}>Explore</Link>
+            <Link to="/startups" className="block px-4 py-2 hover:bg-slate-700/50" onClick={closeAllMenus}>Startups</Link>
+            <Link to="/investors" className="block px-4 py-2 hover:bg-slate-700/50" onClick={closeAllMenus}>Investors</Link>
+            <Link to="/about" className="block px-4 py-2 hover:bg-slate-700/50" onClick={closeAllMenus}>About</Link>
             {!isLoggedIn ? (
-              <Link
-                to="/login"
-                className="block px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                onClick={closeAllMenus}
-              >
-                Login / Signup
-              </Link>
+              <Link to="/login" className="block px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" onClick={closeAllMenus}>Login / Signup</Link>
             ) : (
               <div className="flex flex-col space-y-2">
-                <Link
-                  to="/settings/profile"
-                  className="block px-4 py-2 hover:bg-slate-700/50"
-                  onClick={closeAllMenus}
-                >
-                  Settings
-                </Link>
-                <button
-                  onClick={() => {
-                    logout();
-                    closeAllMenus();
-                  }}
-                  className="block px-4 py-2 text-red-400 hover:bg-slate-700/50"
-                >
-                  Log out
-                </button>
+                <Link to="/settings/profile" className="block px-4 py-2 hover:bg-slate-700/50" onClick={closeAllMenus}>Settings</Link>
+                <button onClick={() => { logout(); closeAllMenus(); }} className="block px-4 py-2 text-red-400 hover:bg-slate-700/50">Log out</button>
               </div>
             )}
           </div>
