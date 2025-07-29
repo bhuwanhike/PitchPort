@@ -3,6 +3,6 @@ import chatbotController from "../controller/chatbot.controller.js";
 
 const Router = express.Router();
 
-Router.route("/").post(chatbotController).get(chatbotController);
+Router.route("/").post(chatbotController);
 
 export default Router;

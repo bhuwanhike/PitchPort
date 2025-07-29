@@ -1863,7 +1863,7 @@ const Explore = () => {
                     />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white font-poppins truncate">
+                    <h3 className="text-xl font-bold text-white font-poppins truncate overflow-hidden w-full">
                       {startup.title}
                     </h3>
                     <p className="text-sm text-slate-400">{startup.investor}</p>
