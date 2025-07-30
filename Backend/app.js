@@ -11,7 +11,9 @@ import addStartupRoute from "./Route/addstartup.route.js";
 import startupsRoute from "./Route/addstartup.route.js";
 import investorsRoute from "./Route/addInvestor.route.js";
 import profileSettingsRoute from "./Route/profileSettings.route.js";
-
+import paymentIntentRoute from "./Route/payIntent.route.js";
+import paymentSuccessRoute from "./Route/paySuccess.route.js";
+import paymentHistoryRoute from "./Route/payHistory.route.js";
 import chatbotRoute from "./Route/chatbot.route.js";
 // import chatbotResultRoute from "./Route/chatbot.route.js";
 import cors from "cors";
@@ -39,7 +41,11 @@ app.use("/addstartup", addStartupRoute);
 app.use("/startups", startupsRoute);
 app.use("/profileSettings", profileSettingsRoute);
 app.use("/chat", chatbotRoute);
-// app.use("/chatresult", chatbotRoute);
+
+// Payment Routes
+app.use("/create-payment-intent", paymentIntentRoute);
+app.use("/record-payment-success", paymentSuccessRoute);
+app.use("/history", paymentHistoryRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

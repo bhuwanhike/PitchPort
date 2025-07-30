@@ -45,18 +45,13 @@ export const AuthProvider = ({ children }) => {
     const decoded = jwtDecode(token);
     const username = (await decoded.username) || decoded.sub;
     const email = (await decoded.email) || decoded.email;
+    const userId = (await decoded.id) || decoded.id;
     const role = (await decoded.role) || decoded.role;
     if (token) {
-      return { username, email, role };
+      return { username, email, role, userId };
     }
-    // return response.data;
   };
-  // const getRegisterUserInfo = async () => {
-  //   const userInfo = await axios.get(
-  //     `${import.meta.env.VITE_BACKEND_API_URL}/register`
-  //   );
-  //   return userInfo;
-  // };
+
 
   const logout = () => {
     localStorage.removeItem("token");

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavLink, Outlet, Link } from "react-router-dom";
 import {
   User,
@@ -8,8 +8,10 @@ import {
   LogOut,
   Settings as SettingsIcon,
 } from "lucide-react";
+import { AuthContext } from "../contexts/auth-context";
 
 const Settings = () => {
+  const { logout } = useContext(AuthContext);
   return (
     <div className="min-h-screen flex bg-[#0D1117]  font-inter">
       {/* Sidebar Navigation */}
@@ -20,25 +22,27 @@ const Settings = () => {
         </Link>
         <div className="flex flex-col justify-between h-[60%]">
           <nav className="flex flex-col space-y-2">
-            <SettingsLink to="/settings/profile" icon={<User />}>
+            <SettingsLink to={`/settings/profile/`} icon={<User />}>
+              {/* {console.log(userData)} */}
               Profile
             </SettingsLink>
-            <SettingsLink to="/settings/dashboard" icon={<User />}>
+            <SettingsLink to={`/settings/dashboard/`} icon={<User />}>
               Dashboard - Under Development
             </SettingsLink>
-            <SettingsLink to="/settings/security" icon={<Shield />}>
+            <SettingsLink to={`/settings/security/`} icon={<Shield />}>
               Security
             </SettingsLink>
-            <SettingsLink to="/settings/notifications" icon={<Bell />}>
+            <SettingsLink to={`/settings/notifications/`} icon={<Bell />}>
               Notifications
             </SettingsLink>
-            <SettingsLink to="/settings/billing" icon={<CreditCard />}>
+            <SettingsLink to={`/settings/billing/`} icon={<CreditCard />}>
               Billing
             </SettingsLink>
           </nav>
           <div className="0">
             <NavLink
-              to="/logout" // Assuming you have a route that handles logout
+              to="/" // Assuming you have a route that handles logout
+              onClick={logout}
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
             >
               <LogOut className="w-5 h-5 text-red-500" />

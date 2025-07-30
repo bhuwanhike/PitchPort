@@ -32,7 +32,6 @@ function App() {
     "/settings/billing",
   ];
   return (
-   
     <StartupProvider>
       <InvestorProvider>
         <AuthProvider>
@@ -47,21 +46,18 @@ function App() {
             <Route path="/settings" element={<Settings />}>
               <Route
                 index
-                element={<Navigate to="settings/profile" replace />}
+                element={<Navigate to="settings/profile/" replace />}
               />
-              <Route path="profile" element={<ProfileContent />} />
-              <Route path="dashboard" element={<DashboardContent />} />
-              <Route path="security" element={<SecurityContent />} />
-              <Route path="notifications" element={<NotificationsContent />} />
-              <Route path="billing" element={<BillingContent />} />
+              <Route path="profile/" element={<ProfileContent />} />
+              <Route path="dashboard/" element={<DashboardContent />} />
+              <Route path="security/" element={<SecurityContent />} />
+              <Route path="notifications/" element={<NotificationsContent />} />
+              <Route path="billing/" element={<BillingContent />} />
             </Route>
 
-            <Route path="/startup/:startupId" element={<StartupDetailPage />} />
+            <Route path="/startup/" element={<StartupDetailPage />} />
 
-            <Route
-              path="/investor/:investorId"
-              element={<InvestorDetailPage />}
-            />
+            <Route path="/investor/" element={<InvestorDetailPage />} />
             {/* Optional: A catch-all route for 404 pages */}
             <Route path="*" element={<div>404 - Page Not Found</div>} />
           </Routes>

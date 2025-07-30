@@ -1,9 +1,27 @@
-import React, { useState } from "react";
-import { CreditCard, Download, CheckCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { CreditCard, Download, CheckCircle, XCircle } from "lucide-react";
+import StripePaymentWrapper from "../components/PaymentForm";
+import { jwtDecode } from "jwt-decode";
 
-// --- DUMMY DATA ---
-const billingData = {
-  currentPlan: {
+// --- HELPER COMPONENTS ---
+
+const SettingsCard = ({ title, description, children }) => (
+  <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/80 rounded-2xl">
+    <div className="p-6 border-b border-slate-700/80">
+      <h2 className="text-xl font-bold text-white">{title}</h2>
+      {description && (
+        <p className="text-sm text-slate-400 mt-1">{description}</p>
+      )}
+    </div>
+    <div className="p-6">{children}</div>
+  </div>
+);
+
+// --- MAIN BILLING PAGE COMPONENT ---
+
+const BillingContent = () => {
+  const [currentPlan, setCurrentPlan] = useState({
+    // MODIFIED: Changed from initialBillingData to individual states
     name: "Pro Investor",
     price: 99,
     period: "monthly",
@@ -13,48 +31,176 @@ const billingData = {
       "Direct Messaging with Founders",
       "Priority Support",
     ],
-  },
-  paymentMethod: {
+  });
+  const [paymentMethod, setPaymentMethod] = useState({
+    // MODIFIED: Changed from initialBillingData to individual states
     brand: "Visa",
     last4: "4242",
     expiry: "12/26",
-  },
-  billingHistory: [
-    { id: "inv_12345", date: "June 1, 2024", amount: 99.0, status: "Paid" },
-    { id: "inv_12344", date: "May 1, 2024", amount: 99.0, status: "Paid" },
-    { id: "inv_12343", date: "April 1, 2024", amount: 99.0, status: "Paid" },
-    { id: "inv_12342", date: "March 1, 2024", amount: 99.0, status: "Paid" },
-  ],
-};
+  });
+  const [billingHistory, setBillingHistory] = useState([]);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState(null);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState(null);
 
-// --- HELPER COMPONENTS ---
+  const [currentUser, setCurrentUser] = useState(null);
 
-const SettingsCard = ({ title, description, children, footer }) => (
-  <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/80 rounded-2xl">
-    <div className="p-6 border-b border-slate-700/80">
-      <h2 className="text-xl font-bold text-white">{title}</h2>
-      {description && (
-        <p className="text-sm text-slate-400 mt-1">{description}</p>
-      )}
-    </div>
-    <div className="p-6">{children}</div>
-    {footer && (
-      <div className="p-6 bg-slate-800/30 border-t border-slate-700/80 rounded-b-2xl flex justify-end items-center">
-        {footer}
-      </div>
-    )}
-  </div>
-);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const decoded = jwtDecode(token);
 
-// --- MAIN BILLING PAGE COMPONENT ---
+    const userId = decoded.id;
+    setCurrentUser(userId);
+    const fetchUserDataAndHistory = async () => {
+      setLoadingHistory(true);
+      setHistoryError(null);
+      try {
+        if (!userId) {
+          console.error("User not logged in or missing ID/email for billing.");
+          setHistoryError("Please log in to view billing details.");
+          return;
+        }
+        setCurrentUser(userId);
 
-const BillingContent = () => {
-  const { currentPlan, paymentMethod, billingHistory } = billingData;
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_API_URL}/history/${userId}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
 
-  const [isTrue, setIsTrue] = useState(false);
+        if (response.ok) {
+          const historyData = await response.json();
+          setBillingHistory(historyData);
+        } else {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Failed to fetch billing history."
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching billing history:", err);
+        setHistoryError(err.message || "Failed to load billing history.");
+      } finally {
+        setLoadingHistory(false);
+      }
+    };
+
+    fetchUserDataAndHistory();
+  }, []);
+
+  const handlePaymentSuccess = async (paymentIntent) => {
+    console.log("Stripe PaymentIntent Succeeded:", paymentIntent);
+    setPaymentMessage("Payment completed successfully!");
+
+    setPaymentMethod((prevMethod) => ({
+      // MODIFIED: Using setPaymentMethod directly
+      ...prevMethod,
+      brand: paymentIntent.payment_method?.card?.brand || "Visa", // MODIFIED: Use actual brand if available
+      last4: paymentIntent.payment_method?.card?.last4 || "XXXX", // MODIFIED: Use actual last4 if available
+      expiry: "XX/XX", // Dummy expiry for now, or fetch from PM object
+    }));
+
+    if (currentUser) {
+      try {
+        const recordResponse = await fetch(
+          `${import.meta.env.VITE_BACKEND_API_URL}/record-payment-success`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              paymentIntentId: paymentIntent.id,
+              userId: currentUser,
+              amount: paymentIntent.amount,
+              currency: paymentIntent.currency,
+            }),
+          }
+        );
+
+        if (recordResponse.ok) {
+          const recordedPayment = await recordResponse.json();
+          console.log("Payment recorded in DB:", recordedPayment);
+
+          // NEW: Re-fetch history to update the UI
+          const updatedHistoryResponse = await fetch(
+            `${import.meta.env.VITE_BACKEND_API_URL}/history/${currentUser}`,
+            {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+          if (updatedHistoryResponse.ok) {
+            const updatedHistory = await updatedHistoryResponse.json();
+            setBillingHistory(updatedHistory);
+            setLoadingHistory(false);
+          } else {
+            console.error(
+              "Failed to re-fetch history after recording payment."
+            );
+          }
+        } else {
+          const errorData = await recordResponse.json();
+          console.error("Failed to record payment in DB:", errorData.message);
+          setPaymentMessage(
+            `Payment succeeded but failed to record history: ${errorData.message}`
+          );
+        }
+      } catch (dbError) {
+        console.error(
+          "Error calling record-payment-success endpoint:",
+          dbError
+        );
+        setPaymentMessage(
+          `Payment succeeded but failed to record history: ${dbError.message}`
+        );
+      }
+    } else {
+      console.warn("No current user to record payment history for.");
+    }
+
+    setShowPaymentForm(false); // Hide the form
+    setTimeout(() => setPaymentMessage(null), 5000); // Clear message after 5 seconds
+  };
+
+  // REfetching billingHistory on page refresh
+  // useEffect(() => {
+  //   const refetching = async () => {
+  //     const updatedHistoryResponse = await fetch(
+  //       `${import.meta.env.VITE_BACKEND_API_URL}/history/${currentUser}`,
+  //       {
+  //         method: "GET",
+  //         headers: { "Content-Type": "application/json" },
+  //       }
+  //     );
+  //     if (updatedHistoryResponse.ok) {
+  //       const updatedHistory = await updatedHistoryResponse.json();
+  //       setBillingHistory(updatedHistory);
+  //       setLoadingHistory(false);
+  //     } else {
+  //       console.error("Failed to re-fetch history after recording payment.");
+  //     }
+  //   };
+  //   refetching();
+  // }, []);
+
+  const handlePaymentError = (error) => {
+    console.error("Stripe Payment Error:", error);
+    setPaymentMessage(`Error processing payment: ${error}`);
+    setTimeout(() => setPaymentMessage(null), 5000); // Clear message after 5 seconds
+  };
+
+  // Function to handle canceling the payment form
+  const handleCancelPayment = () => {
+    setShowPaymentForm(false);
+    setPaymentMessage(null); // Clear any messages when canceling
+  };
+
   return (
     <div className="space-y-8 animate-fadeIn py-8 px-18">
       {/* Page Header */}
+      {/* {console.log(!currentUser?.userId)} */}
       <div>
         <h1 className="text-3xl font-bold text-white font-poppins">
           Billing & Subscriptions
@@ -65,72 +211,43 @@ const BillingContent = () => {
         </p>
       </div>
 
-      {/* Current Plan Section */}
-      <SettingsCard
-        title="Current Plan"
-        footer={
+      {/* Payment Message Display */}
+      {paymentMessage && (
+        <div
+          className={`p-4 rounded-lg text-white ${
+            paymentMessage.startsWith("Error") ? "bg-red-600" : "bg-green-600"
+          } flex items-center justify-between`}
+        >
+          <span>{paymentMessage}</span>
           <button
-            type="button"
-            className="bg-cyan-400 hover:bg-cyan-300 text-slate-900 font-bold px-6 py-2.5 rounded-lg shadow-md transition-colors"
+            onClick={() => setPaymentMessage(null)}
+            className="text-white hover:text-gray-200"
           >
-            Upgrade Plan
+            <XCircle className="w-5 h-5" />
           </button>
-        }
-      >
-        <div className="flex flex-col md:flex-row justify-between items-start">
-          <div>
-            <h3 className="text-2xl font-bold text-white">
-              {currentPlan.name}
-            </h3>
-            <p className="text-slate-400">
-              <span className="text-3xl font-extrabold text-white">
-                ${currentPlan.price}
-              </span>{" "}
-              / month
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0 md:ml-6">
-            <ul className="space-y-2">
-              {currentPlan.features.map((feature, index) => (
-                <li
-                  key={index}
-                  className="flex items-center text-sm text-slate-300"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
-      </SettingsCard>
+      )}
 
-      {/* Payment Method Section */}
+      {/* NEW: Payment Section - Now for initiating a payment for a plan */}
       <SettingsCard
-        title="Payment Method"
-        description="Your primary payment method for all transactions on PitchPort."
-        footer={
-          <button
-            type="button"
-            className="bg-slate-700/80 text-slate-300 border border-slate-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-700 hover:border-slate-500 transition-all"
-          >
-            Update Payment Method
-          </button>
-        }
+        title="Payment Section"
+        description="Pay to become a Pro Investor."
       >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-8 bg-slate-700 rounded-md flex items-center justify-center">
-            <CreditCard className="w-6 h-6 text-slate-400" />
+        <h2 className="text-xl font-bold text-white mx-auto w-full text-center">
+          Pay just $99 to become a Pro Investor
+        </h2>
+        {
+          <div className="mt-4">
+            <StripePaymentWrapper
+              amount={currentPlan.price * 100} // Amount in cents
+              currency="usd"
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+              onCancel={handleCancelPayment}
+              // successMssg={"paymentMessage"}
+            />
           </div>
-          <div>
-            <p className="font-semibold text-white">
-              {paymentMethod.brand} ending in {paymentMethod.last4}
-            </p>
-            <p className="text-sm text-slate-400">
-              Expires {paymentMethod.expiry}
-            </p>
-          </div>
-        </div>
+        }
       </SettingsCard>
 
       {/* Billing History Section */}
@@ -138,7 +255,15 @@ const BillingContent = () => {
         title="Billing History"
         description="Download your past invoices for your records."
       >
-        {isTrue ? (
+        {loadingHistory ? ( // MODIFIED: Added loading state
+          <div className="text-slate-400 text-center py-4">
+            Loading billing history...
+          </div>
+        ) : historyError ? ( // MODIFIED: Added error state
+          <div className="text-red-500 text-center py-4">
+            Error: {historyError}
+          </div>
+        ) : billingHistory.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-slate-400 uppercase">
@@ -151,19 +276,40 @@ const BillingContent = () => {
               </thead>
               <tbody>
                 {billingHistory.map((invoice) => (
-                  <tr key={invoice.id} className="border-t border-slate-700/80">
-                    <td className="px-4 py-4 text-slate-300">{invoice.date}</td>
+                  <tr
+                    key={invoice.stripePaymentIntentId}
+                    className="border-t border-slate-700/80"
+                  >
+                    {" "}
+                    {/* MODIFIED: Key changed to stripePaymentIntentId */}
+                    <td className="px-4 py-4 text-slate-300">
+                      {new Date(invoice.date).toLocaleDateString("en-US", {
+                        // MODIFIED: Date formatting
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </td>
                     <td className="px-4 py-4 text-white font-medium">
-                      ${invoice.amount.toFixed(2)}
+                      ${(invoice.amount / 100).toFixed(2)}{" "}
+                      {/* MODIFIED: Convert cents to dollars */}
                     </td>
                     <td className="px-4 py-4">
-                      <span className="bg-green-500/10 text-green-400 text-xs font-semibold px-2 py-1 rounded-full">
-                        {invoice.status}
+                      <span
+                        className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                          // MODIFIED: Dynamic status styling
+                          invoice.status === "succeeded"
+                            ? "bg-green-500/10 text-green-400"
+                            : "bg-red-500/10 text-red-400"
+                        }`}
+                      >
+                        {invoice.status.charAt(0).toUpperCase() +
+                          invoice.status.slice(1)}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-right">
                       <a
-                        href="#"
+                        href="#" // In a real app, this would be invoice.receiptUrl
                         className="flex items-center justify-end gap-2 text-cyan-400 hover:text-cyan-300 font-semibold"
                       >
                         <Download className="w-4 h-4" />
@@ -176,25 +322,13 @@ const BillingContent = () => {
             </table>
           </div>
         ) : (
-          <div>No history records yet.</div>
+          <div className="text-slate-400 text-center py-4">
+            {" "}
+            {/* MODIFIED: Message for no history */}
+            No billing history records yet.
+          </div>
         )}
       </SettingsCard>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };

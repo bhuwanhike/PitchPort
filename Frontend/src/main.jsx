@@ -10,10 +10,10 @@ import App from "./App.jsx";
 // if (!clerk_key) throw new Error("Clerk key required");
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-     {/* <ClerkProvider publishableKey={clerk_key}> */}
+    {/* <ClerkProvider publishableKey={clerk_key}> */}
     <BrowserRouter>
       <App />
     </BrowserRouter>
-     {/* </ClerkProvider> */}
+    {/* </ClerkProvider> */}
   </StrictMode>
 );

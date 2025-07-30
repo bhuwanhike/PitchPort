@@ -1,22 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { User, Mail, Globe, Linkedin, Twitter, Camera } from "lucide-react";
-import { useContext } from "react";
-import { AuthContext } from "../contexts/auth-context";
-// Reusable component for a settings section - Professional & Clean
-import axios from "axios";
+import { AuthContext } from "../contexts/auth-context"; // Your actual AuthContext
+import { useNavigate } from "react-router-dom"; // Assuming you use react-router-dom for navigation
+
+// Reusable component for a settings section
 const SettingsCard = ({ title, description, children }) => (
-  <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-lg ">
-    {" "}
-    {/* Cleaner background, sharper corners, classic shadow */}
+  <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-lg">
     <div className="p-8 border-b border-slate-700">
-      {" "}
-      {/* Generous padding */}
-      <h2 className="text-2xl font-semibold text-white">{title}</h2>{" "}
-      {/* Professional heading */}
+      <h2 className="text-2xl font-semibold text-white">{title}</h2>
       <p className="text-sm text-slate-400 mt-2">{description}</p>
     </div>
-    <div className="p-8 space-y-6">{children}</div>{" "}
-    {/* Consistent internal spacing */}
+    <div className="p-8 space-y-6">{children}</div>
   </div>
 );
 
@@ -24,62 +18,181 @@ const SettingsCard = ({ title, description, children }) => (
 const FormField = ({ label, children }) => (
   <div className="flex items-center w-full gap-2 pl-5 pr-5">
     <label className="text-lg font-medium text-slate-200 w-[25%]">
-      {" "}
-      {/* Label for left column, right aligned */}
       {label}
     </label>
-    <div className="w-[90%]">{children}</div>{" "}
-    {/* This div contains the input, takes remaining space */}
+    <div className="w-[90%]">{children}</div>
   </div>
 );
 
 const ProfileContent = () => {
+  const { getLoggedInUser } = useContext(AuthContext); // Assuming AuthContext provides this
+  const navigate = useNavigate();
+
+  // State to hold the user's profile data, initialized with empty strings
   const [profile, setProfile] = useState({
-    // fullName: "Bhavya Tyagi",
-    username: "bhavyatyagi",
-    email: "bhavya.tyagi@example.com",
-    // bio: "Founder & CEO at InnovateX. Passionate about building the future of FinTech and supporting early-stage startups. Committed to leveraging AI for social impact and fostering collaborative ecosystems. Always eager to connect with like-minded innovators.",
-    // location: "Bengaluru, India",
-    // website: "https://innovatex.com",
-    // linkedin: "https://linkedin.com/in/bhavyatyagi",
-    // twitter: "https://twitter.com/bhavyatyagi",
-    // avatar: "https://avatars.githubusercontent.com/u/81063625?v=4", // Using a GitHub placeholder for demo
+    fullname: "",
+    username: "",
+    profilePicture: "", // URL of the profile picture
+    email: "",
+    bio: "",
+    location: "",
+    website: "",
+    linkedin: "",
+    twitter: "",
   });
 
-  const handleChange = (e) => {
+  const [loading, setLoading] = useState(true); // Set to true initially for fetching
+  const [error, setError] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false); // State for success message
+
+  useEffect(() => {
+    const fetchOrCreateUserProfile = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const loggedInUser = await getLoggedInUser();
+
+        if (!loggedInUser || !loggedInUser.email) {
+          navigate("/login"); // Redirect if no user or email
+          return;
+        }
+
+        // Attempt to fetch existing profile
+        const fetchResponse = await fetch(
+          `${import.meta.env.VITE_BACKEND_API_URL}/profileSettings?email=${
+            loggedInUser.email
+          }`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              // Include Authorization header if your backend requires it for fetching
+              // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        );
+
+        if (fetchResponse.ok) {
+          const fetchedProfile = await fetchResponse.json();
+          setProfile(fetchedProfile); // Set profile from fetched data
+        } else if (fetchResponse.status === 404) {
+          // Profile not found, create a new one
+          console.log("Profile not found, creating new one...");
+          const newProfileData = {
+            fullname: loggedInUser.fullname || "",
+            username: loggedInUser.username || "",
+            profilePicture: loggedInUser.profilePicture || "",
+            email: loggedInUser.email, // Email is crucial for initial creation
+            bio: loggedInUser.bio || "",
+            location: loggedInUser.location || "",
+            website: loggedInUser.website || "",
+            linkedin: loggedInUser.linkedin || "",
+            twitter: loggedInUser.twitter || "",
+          };
+
+          const createResponse = await fetch(
+            `${import.meta.env.VITE_BACKEND_API_URL}/profileSettings`,
+            {
+              method: "POST", // Use POST for creating
+              headers: {
+                "Content-Type": "application/json",
+                // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              },
+              body: JSON.stringify(newProfileData),
+            }
+          );
+
+          if (createResponse.ok) {
+            const createdProfile = await createResponse.json();
+            setProfile(createdProfile);
+            console.log("Profile created successfully.");
+          } else {
+            const errorData = await createResponse.json();
+            throw new Error(
+              errorData.message || "Failed to create profile on login."
+            );
+          }
+        } else {
+          const errorData = await fetchResponse.json();
+          throw new Error(
+            errorData.message || "Failed to fetch profile settings."
+          );
+        }
+      } catch (err) {
+        console.error("Error in fetchOrCreateUserProfile:", err);
+        setError(err.message || "Failed to load profile. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrCreateUserProfile();
+  }, [getLoggedInUser, navigate]); // Depend on getLoggedInUser and navigate
+
+  const onChangeData = (e) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  // const getRegisterUserInfo = async () => {
-  //   const response = await axios.get(
-  //     `${import.meta.env.VITE_BACKEND_API_URL}/register`
-  //   );
-  //   console.log(response);
-  //   // return response.data;
-  // };
+  // Handles form submission to update user profile
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    setIsUpdating(true); // Set updating state
+    setError(null); // Clear previous errors
+    setShowSuccess(false); // Hide previous success message
 
-  const { getLoggedInUser } = useContext(AuthContext);
-  // const getLoggedInUser = async () => {
-  //   const response = await axios.get(
-  //     `${import.meta.env.VITE_BACKEND_API_URL}/login`
-  //   );
-  //   console.log(response);
-  //   // return response.data;
-  // };
-  // getRegisterUserInfo();
-  async function getUser() {
-    const loggedInUser = await getLoggedInUser();
-    setProfile(loggedInUser);
-  }
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
 
-  useEffect(() => {
-    getUser();
-  }, []);
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Profile updated:", profile);
-    // In a real app: Send data to backend, show success/error feedback
+      // Ensure the email is present for the update, likely from the current profile state
+      if (!profile.email) {
+        throw new Error("User email is missing for profile update.");
+      }
+
+      // Send a PUT request to update the profile
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_API_URL}/profileSettings`,
+        {
+          method: "PUT", // Use PUT for updating an existing resource
+          headers: {
+            "Content-Type": "application/json",
+            // 'Authorization': `Bearer ${token}`, // Include JWT token for authentication
+          },
+          body: JSON.stringify({
+            // Send all updatable fields, including email for identification
+            email: profile.email, // IMPORTANT: Send email to identify which profile to update
+            fullname: profile.fullname,
+            username: profile.username,
+            profilePicture: profile.profilePicture, // Send updated picture URL if any
+            bio: profile.bio,
+            location: profile.location,
+            website: profile.website,
+            linkedin: profile.linkedin,
+            twitter: profile.twitter,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update profile");
+      }
+
+      const updatedData = await response.json();
+      setProfile(updatedData); // Update state with the data returned from the backend
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000); // Hide success message after 3 seconds
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      setError(err.message || "Failed to update profile. Please try again.");
+    } finally {
+      setIsUpdating(false); // Reset updating state
+    }
   };
 
   const handleAvatarUpload = (e) => {
@@ -87,17 +200,29 @@ const ProfileContent = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfile((prev) => ({ ...prev, avatar: reader.result }));
-        // In a real app, upload this file to your server (e.g., Cloudinary, S3)
+        setProfile((prev) => ({ ...prev, profilePicture: reader.result }));
       };
       reader.readAsDataURL(file);
     }
   };
-  // const { getRegisterUserInfo } = useContext(AuthContext);
-  // const result = getRegisterUserInfo();
-  // console.log(result);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen text-white">
+        Loading profile...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        <p>Error: {error}</p>
+      </div>
+    );
+  }
+
   return (
-    // Max-width, centering, and generous top/bottom padding for the main content
     <div className="space-y-12 animate-fadeInforProfile max-w-8xl mx-auto py-8 px-18">
       <div>
         <h1 className="text-3xl font-bold text-white font-poppins">
@@ -106,7 +231,7 @@ const ProfileContent = () => {
         <p className="text-slate-400 mt-1">Update your profile information.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-12 ">
+      <form onSubmit={handleUpdateProfile} className="space-y-12">
         <div className="flex gap-12">
           {/* Avatar Section */}
           <SettingsCard
@@ -115,18 +240,19 @@ const ProfileContent = () => {
           >
             <div className="flex flex-col w-100 h-80 items-center gap-y-4 md:gap-x-8">
               <div className="flex flex-col items-center gap-15">
-                <div className="relative w-80  group">
-                  {/* Larger avatar */}
-
-                  {profile.avatar ? (
+                <div className="relative w-80 group">
+                  {/* Display profile picture or initial */}
+                  {profile.profilePicture ? (
                     <img
-                      src={`https://gratisography.com/wp-content/uploads/2024/11/gratisography-augmented-reality-800x525.jpg`}
+                      src={profile.profilePicture}
                       alt="Profile Avatar"
                       className="w-80 h-80 rounded-full object-cover border-4 border-slate-700"
                     />
                   ) : (
                     <div className="w-80 h-80 flex items-center justify-center rounded-full border-4 border-slate-700 !text-8xl font-bold text-white">
-                      {profile.username.charAt(0).toUpperCase()}
+                      {profile.username
+                        ? profile.username.charAt(0).toUpperCase()
+                        : "U"}
                     </div>
                   )}
 
@@ -145,12 +271,21 @@ const ProfileContent = () => {
                     onChange={handleAvatarUpload}
                   />
                 </div>
-                <button className="text-sm text-swhite">Upload Photo</button>
+                {/* The "Upload Photo" button now triggers the hidden file input */}
+                <button
+                  type="button" // Important: type="button" to prevent form submission
+                  onClick={() =>
+                    document.getElementById("avatar-upload").click()
+                  }
+                  className="text-sm text-white"
+                >
+                  Upload Photo
+                </button>
               </div>
             </div>
           </SettingsCard>
           {/* Personal Information Section */}
-          <div className="w-[70%] ">
+          <div className="w-[70%]">
             <SettingsCard
               title="Personal Information"
               description="Edit your personal details."
@@ -158,13 +293,12 @@ const ProfileContent = () => {
               <FormField label="Full Name">
                 <input
                   type="text"
-                  name="fullName"
-                  value={profile.fullName}
-                  onChange={handleChange}
-                  className="input-field "
+                  name="fullname"
+                  value={profile.fullname}
+                  onChange={onChangeData}
+                  className="input-field"
                   placeholder="Full Name"
                 />
-                {/* {console.log(profile.username)} */}
               </FormField>
               <FormField label="Username">
                 <div className="relative">
@@ -175,8 +309,8 @@ const ProfileContent = () => {
                     type="text"
                     name="username"
                     value={profile.username}
-                    onChange={handleChange}
-                    className="input-field !pl-8" // Adjusted padding for icon
+                    onChange={onChangeData}
+                    className="input-field !pl-8"
                     placeholder="yourusername"
                   />
                 </div>
@@ -187,9 +321,10 @@ const ProfileContent = () => {
                     type="email"
                     name="email"
                     value={profile.email}
-                    onChange={handleChange}
-                    className="input-field " // Adjusted padding for icon
+                    onChange={onChangeData}
+                    className="input-field"
                     placeholder="your email"
+                    disabled // Disable email field as it's usually not changeable directly
                   />
                 </div>
               </FormField>
@@ -198,8 +333,8 @@ const ProfileContent = () => {
                   type="text"
                   name="location"
                   value={profile.location}
-                  onChange={handleChange}
-                  className="input-field "
+                  onChange={onChangeData}
+                  className="input-field"
                   placeholder="City, Country"
                 />
               </FormField>
@@ -207,9 +342,9 @@ const ProfileContent = () => {
                 <textarea
                   name="bio"
                   value={profile.bio}
-                  onChange={handleChange}
+                  onChange={onChangeData}
                   rows="6"
-                  className="input-field "
+                  className="input-field"
                   placeholder="Tell us about yourself and your passion..."
                 ></textarea>
               </FormField>
@@ -222,14 +357,14 @@ const ProfileContent = () => {
           description="Add links to your website and social profiles."
         >
           <FormField label="Website">
-            <div className="relative ">
+            <div className="relative">
               <Globe className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-500" />
               <input
                 type="url"
                 name="website"
                 value={profile.website}
-                onChange={handleChange}
-                className="input-field !pl-12" // Adjusted padding for icon
+                onChange={onChangeData}
+                className="input-field !pl-12"
                 placeholder="https://your-website.com"
               />
             </div>
@@ -241,7 +376,7 @@ const ProfileContent = () => {
                 type="url"
                 name="linkedin"
                 value={profile.linkedin}
-                onChange={handleChange}
+                onChange={onChangeData}
                 className="input-field !pl-12"
                 placeholder="https://linkedin.com/in/your-profile"
               />
@@ -254,7 +389,7 @@ const ProfileContent = () => {
                 type="url"
                 name="twitter"
                 value={profile.twitter}
-                onChange={handleChange}
+                onChange={onChangeData}
                 className="input-field !pl-12"
                 placeholder="https://twitter.com/your-handle"
               />
@@ -262,10 +397,8 @@ const ProfileContent = () => {
           </FormField>
         </SettingsCard>
 
-        {/* Save Button */}
-        <div className="mt-12 pt-8 flex justify-start ml-10 border-t border-slate-700">
-          {" "}
-          {/* Increased top margin and padding */}
+        {/* Save Button and Messages */}
+        <div className="mt-12 pt-8 flex justify-start ml-10 border-t border-slate-700 items-center gap-4">
           <button
             type="submit"
             className="
@@ -274,9 +407,16 @@ const ProfileContent = () => {
               transition-all duration-300 hover:brightness-110
               focus:outline-none focus:ring-4 focus:ring-cyan-500 focus:ring-opacity-60
             "
+            disabled={isUpdating} // Disable button while updating
           >
-            Update Profile
+            {isUpdating ? "Updating..." : "Update Profile"}
           </button>
+          {showSuccess && (
+            <p className="text-green-500 text-sm">
+              Profile updated successfully!
+            </p>
+          )}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
         </div>
       </form>
     </div>

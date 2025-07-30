@@ -1853,19 +1853,20 @@ const Explore = () => {
                 key={`${startup.id}-${index}`}
                 className="group startup-card flex-none w-[400px] p-6  bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/80 transition-all duration-300 hover:bg-slate-700/50 hover:border-cyan-400/50 hover:-translate-y-2 flex flex-col"
               >
-                <div className="flex items-center gap-5 mb-4">
-                  <div className="relative w-20 h-20 flex-shrink-0">
-                    <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-purple-600 to-cyan-500 opacity-0 group-hover:opacity-100 transition duration-300 blur-sm"></div>
-                    <img
-                      src={startup.urlToImage}
-                      alt={`${startup.name} Logo`}
-                      className="relative w-full h-full rounded-full object-cover border-2 border-slate-700"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white font-poppins truncate overflow-hidden w-full">
+                <div className="flex  items-center gap-5 mb-4">
+                  <div className="flex items-center justify-around gap-5 w-[90%]">
+                    <div className="flex justify-between items-center relative w-20 h-20 flex-shrink-0 ">
+                      <div className=" absolute -inset-0.5 rounded-full bg-gradient-to-r from-purple-600 to-cyan-500 opacity-0 group-hover:opacity-100 transition duration-300 blur-sm"></div>
+                      <img
+                        src={startup.urlToImage}
+                        alt={`${startup.name} Logo`}
+                        className="relative w-full h-full rounded-full object-cover border-2 border-slate-700"
+                      />
+                    </div>
+                    <h3 className="text-xl font-bold text-white font-poppins overflow-hidden truncate w-[100%] ">
                       {startup.title}
                     </h3>
+
                     <p className="text-sm text-slate-400">{startup.investor}</p>
                   </div>
                 </div>

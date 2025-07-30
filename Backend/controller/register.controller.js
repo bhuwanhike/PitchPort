@@ -8,6 +8,7 @@ const registerController = async (req, res) => {
       res.status(400).json({ message: "User already exists" });
     } else {
       const user = await User.create({ username, email, password, role });
+      await user.save();
       const token = await user.generateToken();
       res
         .status(201)

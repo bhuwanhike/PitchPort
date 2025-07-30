@@ -3,7 +3,6 @@ import mongoose, { mongo } from "mongoose";
 const ProfileSettingSchema = new mongoose.Schema({
   fullname: {
     type: String,
-    required: true,
   },
   username: {
     type: String,
@@ -18,10 +17,7 @@ const ProfileSettingSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  password: {
-    type: String,
-    required: true,
-  },
+
   bio: {
     type: String,
   },
