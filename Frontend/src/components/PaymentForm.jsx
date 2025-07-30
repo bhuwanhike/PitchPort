@@ -47,6 +47,8 @@ const CheckoutForm = ({
   onError,
   onCancel,
   successMssg,
+  showSuccessMssg,
+  setShowSuccessMssg,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -170,11 +172,13 @@ const CheckoutForm = ({
             {paymentError}
           </div>
         )}
-        {paymentSuccess && (
-          <div className="text-green-500 text-sm bg-green-900/20 border border-green-700 rounded-md p-3">
-            {successMssg}
-          </div>
-        )}
+        {showSuccessMssg
+          ? paymentSuccess && (
+              <div className="text-green-500 text-sm bg-green-900/20 border border-green-700 rounded-md p-3">
+                {successMssg}
+              </div>
+            )
+          : null}
       </div>
 
       <button
@@ -202,6 +206,9 @@ const StripePaymentWrapper = ({
   onSuccess,
   onError,
   onCancel,
+  successMssg,
+  showSuccessMssg,
+  setShowSuccessMssg,
 }) => {
   return (
     <div className="max-w-md mx-auto my-10">
@@ -211,7 +218,10 @@ const StripePaymentWrapper = ({
           currency={currency}
           onSuccess={onSuccess}
           onError={onError}
-          onCancel={onCancel} // Pass onCancel to CheckoutForm
+          onCancel={onCancel}
+          successMssg={successMssg}
+          showSuccessMssg={showSuccessMssg}
+          setShowSuccessMssg={setShowSuccessMssg}
         />
       </Elements>
     </div>

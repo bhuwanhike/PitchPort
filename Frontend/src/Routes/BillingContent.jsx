@@ -43,7 +43,7 @@ const BillingContent = () => {
   const [paymentMessage, setPaymentMessage] = useState(null);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [historyError, setHistoryError] = useState(null);
-
+  const [showSuccessMssg, setShowSuccessMssg] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -161,40 +161,19 @@ const BillingContent = () => {
     }
 
     setShowPaymentForm(false); // Hide the form
-    setTimeout(() => setPaymentMessage(null), 5000); // Clear message after 5 seconds
+    setTimeout(() => setShowSuccessMssg(false), 5000);
   };
-
-  // REfetching billingHistory on page refresh
-  // useEffect(() => {
-  //   const refetching = async () => {
-  //     const updatedHistoryResponse = await fetch(
-  //       `${import.meta.env.VITE_BACKEND_API_URL}/history/${currentUser}`,
-  //       {
-  //         method: "GET",
-  //         headers: { "Content-Type": "application/json" },
-  //       }
-  //     );
-  //     if (updatedHistoryResponse.ok) {
-  //       const updatedHistory = await updatedHistoryResponse.json();
-  //       setBillingHistory(updatedHistory);
-  //       setLoadingHistory(false);
-  //     } else {
-  //       console.error("Failed to re-fetch history after recording payment.");
-  //     }
-  //   };
-  //   refetching();
-  // }, []);
 
   const handlePaymentError = (error) => {
     console.error("Stripe Payment Error:", error);
     setPaymentMessage(`Error processing payment: ${error}`);
-    setTimeout(() => setPaymentMessage(null), 5000); // Clear message after 5 seconds
+    setTimeout(() => setShowSuccessMssg(false), 5000); // Clear message after 5 seconds
   };
 
   // Function to handle canceling the payment form
   const handleCancelPayment = () => {
     setShowPaymentForm(false);
-    setPaymentMessage(null); // Clear any messages when canceling
+    setShowSuccessMssg(false); // Clear any messages when canceling
   };
 
   return (
@@ -212,7 +191,7 @@ const BillingContent = () => {
       </div>
 
       {/* Payment Message Display */}
-      {paymentMessage && (
+      {/* {paymentMessage && (
         <div
           className={`p-4 rounded-lg text-white ${
             paymentMessage.startsWith("Error") ? "bg-red-600" : "bg-green-600"
@@ -226,7 +205,7 @@ const BillingContent = () => {
             <XCircle className="w-5 h-5" />
           </button>
         </div>
-      )}
+      )} */}
 
       {/* NEW: Payment Section - Now for initiating a payment for a plan */}
       <SettingsCard
@@ -244,7 +223,9 @@ const BillingContent = () => {
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
               onCancel={handleCancelPayment}
-              // successMssg={"paymentMessage"}
+              successMssg={paymentMessage}
+              showSuccessMssg={showSuccessMssg}
+              setShowSuccessMssg={setShowSuccessMssg}
             />
           </div>
         }
