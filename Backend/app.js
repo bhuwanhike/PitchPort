@@ -22,7 +22,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const corsOptions = {
-  origin: "https://pitchport.onrender.com",
+  origin: "https://pitchport-frontend.onrender.com",
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Add all methods your frontend will use
   allowedHeaders: ["Content-Type", "Authorization"],
