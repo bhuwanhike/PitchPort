@@ -295,7 +295,6 @@ const SubmitInvestorForm = ({ onClose, addInvestor }) => {
     // startupData.fundingNeeded = Number(startupData.fundingNeeded);
     addInvestor(startupData); // Pass form data to the addStartup function
     onClose();
-    window.location.href = "/investors"; // Redirect to investors page after submission
   };
 
   const industryOptions = [

@@ -93,7 +93,7 @@ export const StartupProvider = ({ children }) => {
         `${import.meta.env.VITE_BACKEND_API_URL}/startups`
       );
       
-      console.log(response.data);
+   
       if (response.data.length > 0) {
         setStartupList(response.data);
       } else {

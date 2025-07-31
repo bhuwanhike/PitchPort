@@ -245,7 +245,6 @@ const SubmitStartupForm = ({ onClose, addStartup }) => {
     // startupData.fundingNeeded = Number(startupData.fundingNeeded);
     addStartup(startupData); // Pass form data to the addStartup function
     onClose();
-    window.location.href = "/startups"; // Close the form on submit
   };
 
   const industryOptions = [
